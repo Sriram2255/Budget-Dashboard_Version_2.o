@@ -1,0 +1,22 @@
+2025-10-12 15:53:57,013 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 15:54:04,650 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 15:54:23,481 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 15:54:36,632 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 15:54:59,796 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 15:55:14,855 - ERROR - Error processing data: There are multiple `text_input` elements with the same auto-generated ID. When this element is created, it is assigned an internal ID based on the element type and provided parameters. Multiple elements with the same type and parameters will cause this error.
+
+To fix this error, please pass a unique `key` argument to the `text_input` element.
+2025-10-12 16:03:15,278 - ERROR - Error processing data: 'responsible_agency'
+2025-10-12 16:03:38,299 - ERROR - Error processing data: 'responsible_agency'
+2025-10-12 16:10:42,856 - ERROR - Error processing data: There are multiple elements with the same `key='agency_filter_1'`. To fix this, please make sure that the `key` argument is unique for each element you create.
+2025-10-12 16:12:47,378 - ERROR - Error processing data: There are multiple elements with the same `key='agency_filter_1'`. To fix this, please make sure that the `key` argument is unique for each element you create.

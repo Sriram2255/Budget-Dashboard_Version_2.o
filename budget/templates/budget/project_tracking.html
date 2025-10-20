@@ -1,0 +1,246 @@
+{% extends 'budget/base.html' %}
+
+{% block title %}Project Tracking - Project Management System{% endblock %}
+{% block page_title %}Project Tracking{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>Track Project Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="tracking_id" class="form-label">Enter Tracking ID</label>
+                            <input type="text" class="form-control form-control-lg" id="tracking_id" name="tracking_id" 
+                                   value="{{ tracking_id }}" placeholder="e.g., PRJ251019A1B2" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search me-2"></i>Track Project
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if project %}
+                <!-- Project Found -->
+                <div class="alert alert-success">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-check-circle me-2"></i>Project Found!
+                    </h5>
+                    <p class="mb-0">Project <strong>{{ project.tracking_id }}</strong> has been found.</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Project Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Tracking ID:</strong></td>
+                                        <td><code>{{ project.tracking_id }}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Project Name:</strong></td>
+                                        <td>{{ project.project_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Domain:</strong></td>
+                                        <td><span class="badge bg-info">{{ project.get_domain_display }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Priority:</strong></td>
+                                        <td>
+                                            <span class="badge bg-{% if project.priority == 'urgent' %}danger{% elif project.priority == 'high' %}warning{% elif project.priority == 'medium' %}primary{% else %}secondary{% endif %}">
+                                                {{ project.get_priority_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total Cost:</strong></td>
+                                        <td><strong>₹{{ project.total_cost|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Current Status</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <span class="badge bg-{{ project.get_status_color }} fs-5 p-3">{{ project.get_status_display }}</span>
+                                </div>
+                                
+                                {% if project.reviewed_by %}
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Reviewed By:</strong></td>
+                                        <td>{{ project.reviewed_by.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Review Date:</strong></td>
+                                        <td>{{ project.review_date|date:"M d, Y" }}</td>
+                                    </tr>
+                                </table>
+                                {% endif %}
+                                
+                                <div class="mt-3">
+                                    <a href="{% url 'project_detail' project.tracking_id %}" class="btn btn-primary">
+                                        <i class="fas fa-eye me-2"></i>View Full Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Timeline -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Project Timeline</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-primary"></div>
+                                <div class="timeline-content">
+                                    <h6>Project Submitted</h6>
+                                    <p class="text-muted mb-0">{{ project.created_at|date:"M d, Y H:i" }}</p>
+                                    <small class="text-muted">Project was submitted for review</small>
+                                </div>
+                            </div>
+                            
+                            {% if project.review_date %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-{{ project.get_status_color }}"></div>
+                                <div class="timeline-content">
+                                    <h6>Status Updated</h6>
+                                    <p class="text-muted mb-0">{{ project.review_date|date:"M d, Y H:i" }}</p>
+                                    <small class="text-muted">Status changed to: {{ project.get_status_display }}</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if project.status == 'pending' %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-warning"></div>
+                                <div class="timeline-content">
+                                    <h6>Under Review</h6>
+                                    <p class="text-muted mb-0">Currently being reviewed</p>
+                                    <small class="text-muted">Your project is being evaluated by the review team</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Review Comments -->
+                {% if project.review_comments %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Review Comments</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="border p-3 bg-light">
+                            {{ project.review_comments|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% elif tracking_id %}
+                <!-- Project Not Found -->
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Project Not Found
+                    </h5>
+                    <p class="mb-0">No project found with tracking ID: <strong>{{ tracking_id }}</strong></p>
+                    <hr>
+                    <p class="mb-0">Please check the tracking ID and try again.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Help Section -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-question-circle me-2"></i>Need Help?
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>How to find your Tracking ID:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Check your email confirmation</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Look in your dashboard</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Check your notifications</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Project Status Meanings:</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-warning me-2">Pending</span>Under review</li>
+                            <li><span class="badge bg-info me-2">Under Review</span>Being evaluated</li>
+                            <li><span class="badge bg-success me-2">Approved</span>Project approved</li>
+                            <li><span class="badge bg-danger me-2">Rejected</span>Project rejected</li>
+                            <li><span class="badge bg-secondary me-2">Modification</span>Needs changes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.timeline-content p {
+    font-size: 12px;
+}
+</style>
+{% endblock %}

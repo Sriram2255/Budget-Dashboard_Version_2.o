@@ -1,0 +1,123 @@
+{% extends 'budget/base.html' %}
+{% load static %}
+
+{% block title %}Edit Project Costing{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Edit Project Costing</h2>
+            <div class="alert alert-info">
+                <strong>Note:</strong> This project costing requires modifications as requested by the reviewer. Please make the necessary changes and resubmit.
+            </div>
+            
+            {% if costing.review_comments %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Review Comments</h4>
+                </div>
+                <div class="card-body">
+                    {{ costing.review_comments|linebreaks }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <h4 class="mt-2">Manpower Requirements</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.manpower_count.id_for_label }}">Number of Personnel</label>
+                                    {{ form.manpower_count|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.manpower_cost.id_for_label }}">Manpower Cost (₹)</label>
+                                    {{ form.manpower_cost|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mt-4">Material Requirements</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.material_description.id_for_label }}">Material Description</label>
+                                    {{ form.material_description|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.material_cost.id_for_label }}">Material Cost (₹)</label>
+                                    {{ form.material_cost|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mt-4">Other Costs</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.other_costs_description.id_for_label }}">Other Costs Description</label>
+                                    {{ form.other_costs_description|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.other_costs.id_for_label }}">Other Costs (₹)</label>
+                                    {{ form.other_costs|add_class:"form-control" }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4 class="mt-4">Justification</h4>
+                        <div class="form-group">
+                            <label for="{{ form.justification.id_for_label }}">Justification Text</label>
+                            {{ form.justification|add_class:"form-control" }}
+                        </div>
+                        
+                        <div class="form-group mt-3">
+                            <label for="{{ file_form.file.id_for_label }}">Additional Supporting Documents (Optional)</label>
+                            <div class="custom-file">
+                                {{ file_form.file|add_class:"form-control" }}
+                                <small class="form-text text-muted">You can select multiple files by holding Ctrl or Cmd while selecting.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Resubmit Project Costing</button>
+                            <a href="{% url 'project_costing_detail' costing.id %}" class="btn btn-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Calculate total cost automatically
+    $(document).ready(function() {
+        function calculateTotal() {
+            var manpowerCost = parseFloat($('#{{ form.manpower_cost.id_for_label }}').val()) || 0;
+            var materialCost = parseFloat($('#{{ form.material_cost.id_for_label }}').val()) || 0;
+            var otherCosts = parseFloat($('#{{ form.other_costs.id_for_label }}').val()) || 0;
+            
+            var total = manpowerCost + materialCost + otherCosts;
+            $('#total-cost').text(total.toFixed(2));
+        }
+        
+        $('#{{ form.manpower_cost.id_for_label }}, #{{ form.material_cost.id_for_label }}, #{{ form.other_costs.id_for_label }}').on('input', calculateTotal);
+        
+        calculateTotal();
+    });
+</script>
+{% endblock %}

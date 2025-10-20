@@ -1,0 +1,237 @@
+{% extends 'budget/base.html' %}
+{% load static %}
+
+{% block title %}Review Project Costing{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2>Review Project Costing</h2>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'superuser_dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ costing.project_name }}</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Domain:</div>
+                        <div class="col-md-8">{{ costing.get_domain_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Status:</div>
+                        <div class="col-md-8">
+                            {% if costing.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending Review</span>
+                            {% elif costing.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif costing.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif costing.status == 'modification_requested' %}
+                                <span class="badge bg-info">Modification Requested</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Submitted By:</div>
+                        <div class="col-md-8">{{ costing.submitted_by.get_full_name|default:costing.submitted_by.username }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Submitted On:</div>
+                        <div class="col-md-8">{{ costing.created_at|date:"F d, Y H:i" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Last Updated:</div>
+                        <div class="col-md-8">{{ costing.updated_at|date:"F d, Y H:i" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 font-weight-bold">Description:</div>
+                        <div class="col-md-8">{{ costing.description|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Cost Breakdown</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th class="text-right">Cost (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Manpower</td>
+                                <td>{{ costing.manpower_count }} personnel</td>
+                                <td class="text-right">{{ costing.manpower_cost }}</td>
+                            </tr>
+                            <tr>
+                                <td>Materials</td>
+                                <td>{{ costing.material_description|linebreaks }}</td>
+                                <td class="text-right">{{ costing.material_cost }}</td>
+                            </tr>
+                            <tr>
+                                <td>Other Costs</td>
+                                <td>{{ costing.other_costs_description|linebreaks }}</td>
+                                <td class="text-right">{{ costing.other_costs }}</td>
+                            </tr>
+                            <tr class="table-active font-weight-bold">
+                                <td colspan="2">Total</td>
+                                <td class="text-right">{{ costing.total_cost }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Justification</h4>
+                </div>
+                <div class="card-body">
+                    {{ costing.justification|linebreaks }}
+                </div>
+            </div>
+            
+            {% if revisions %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Revision History</h4>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="revisionAccordion">
+                        {% for revision in revisions %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ revision.id }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse{{ revision.id }}" aria-expanded="false" aria-controls="collapse{{ revision.id }}">
+                                        Revision #{{ revision.revision_number }} - {{ revision.revised_at|date:"F d, Y H:i" }}
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse{{ revision.id }}" class="collapse" aria-labelledby="heading{{ revision.id }}" data-parent="#revisionAccordion">
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 font-weight-bold">Revised By:</div>
+                                        <div class="col-md-8">{{ revision.revised_by.get_full_name|default:revision.revised_by.username }}</div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-md-4 font-weight-bold">Comments:</div>
+                                        <div class="col-md-8">{{ revision.revision_comments|linebreaks }}</div>
+                                    </div>
+                                    <h5 class="mt-3">Previous Values:</h5>
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Item</th>
+                                                <th>Description</th>
+                                                <th class="text-right">Cost (₹)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Manpower</td>
+                                                <td>{{ revision.manpower_count }} personnel</td>
+                                                <td class="text-right">{{ revision.manpower_cost }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Materials</td>
+                                                <td>{{ revision.material_description|linebreaks }}</td>
+                                                <td class="text-right">{{ revision.material_cost }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Other Costs</td>
+                                                <td>{{ revision.other_costs_description|linebreaks }}</td>
+                                                <td class="text-right">{{ revision.other_costs }}</td>
+                                            </tr>
+                                            <tr class="table-active font-weight-bold">
+                                                <td colspan="2">Total</td>
+                                                <td class="text-right">{{ revision.total_cost }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">Review Decision</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">Decision</label>
+                            {{ form.status|add_class:"form-control" }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.review_comments.id_for_label }}">Comments</label>
+                            {{ form.review_comments|add_class:"form-control" }}
+                            <small class="form-text text-muted">Please provide detailed feedback, especially if requesting modifications or rejecting.</small>
+                        </div>
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                            <a href="{% url 'superuser_dashboard' %}" class="btn btn-secondary ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Supporting Documents</h4>
+                </div>
+                <div class="card-body">
+                    {% if justification_files %}
+                        <ul class="list-group">
+                            {% for file in justification_files %}
+                                <li class="list-group-item">
+                                    <a href="{{ file.file.url }}" target="_blank">
+                                        {% if 'image' in file.file_type %}
+                                            <i class="fas fa-image"></i>
+                                        {% elif 'pdf' in file.file_type %}
+                                            <i class="fas fa-file-pdf"></i>
+                                        {% elif 'word' in file.file_type or 'document' in file.file_type %}
+                                            <i class="fas fa-file-word"></i>
+                                        {% elif 'excel' in file.file_type or 'sheet' in file.file_type %}
+                                            <i class="fas fa-file-excel"></i>
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                        {{ file.file_name }}
+                                    </a>
+                                    <span class="badge bg-secondary float-right">{{ file.uploaded_at|date:"M d, Y" }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No supporting documents attached.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

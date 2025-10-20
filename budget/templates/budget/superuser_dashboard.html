@@ -1,0 +1,306 @@
+{% extends 'budget/base.html' %}
+{% load static %}
+
+{% block title %}Superuser Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2>Project Costing Dashboard</h2>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Costings</h5>
+                    <h2 class="card-text">{{ total_costings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Review</h5>
+                    <h2 class="card-text">{{ pending_costings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Approved</h5>
+                    <h2 class="card-text">{{ approved_costings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Rejected</h5>
+                    <h2 class="card-text">{{ rejected_costings }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Domain Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="domainChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Monthly Cost Trends (Approved Projects)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="costTrendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Project Costings</h5>
+                    <div>
+                        <form method="get" class="form-inline">
+                            <select name="status" class="form-control mr-2">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Review</option>
+                                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                                <option value="modification_requested" {% if status_filter == 'modification_requested' %}selected{% endif %}>Modification Requested</option>
+                            </select>
+                            <select name="domain" class="form-control mr-2">
+                                <option value="">All Domains</option>
+                                <option value="civil" {% if domain_filter == 'civil' %}selected{% endif %}>Civil</option>
+                                <option value="mechanical" {% if domain_filter == 'mechanical' %}selected{% endif %}>Mechanical</option>
+                                <option value="both" {% if domain_filter == 'both' %}selected{% endif %}>Both Civil & Mechanical</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Project Name</th>
+                                    <th>Domain</th>
+                                    <th>Submitted By</th>
+                                    <th>Total Cost</th>
+                                    <th>Status</th>
+                                    <th>Submitted On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for costing in costings %}
+                                    <tr>
+                                        <td>{{ costing.project_name }}</td>
+                                        <td>{{ costing.get_domain_display }}</td>
+                                        <td>{{ costing.submitted_by.get_full_name|default:costing.submitted_by.username }}</td>
+                                        <td>₹{{ costing.total_cost }}</td>
+                                        <td>
+                                            {% if costing.status == 'pending' %}
+                                                <span class="badge bg-warning text-dark">Pending Review</span>
+                                            {% elif costing.status == 'approved' %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif costing.status == 'rejected' %}
+                                                <span class="badge bg-danger">Rejected</span>
+                                            {% elif costing.status == 'modification_requested' %}
+                                                <span class="badge bg-info">Modification Requested</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ costing.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <a href="{% url 'review_project_costing' costing.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> Review
+                                            </a>
+                                            {% if costing.status == 'approved' %}
+                                                <a href="{% url 'generate_quotation' costing.id %}" class="btn btn-sm btn-success ml-1">
+                                                    <i class="fas fa-file-pdf"></i> Quotation
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">No project costings found matching the criteria.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Fetch dashboard data
+        $.ajax({
+            url: '{% url "dashboard_data" %}',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                // Status distribution chart
+                var statusCtx = document.getElementById('statusChart').getContext('2d');
+                var statusLabels = data.status_data.map(function(item) {
+                    var statusMap = {
+                        'pending': 'Pending Review',
+                        'approved': 'Approved',
+                        'rejected': 'Rejected',
+                        'modification_requested': 'Modification Requested'
+                    };
+                    return statusMap[item.status] || item.status;
+                });
+                var statusCounts = data.status_data.map(function(item) {
+                    return item.count;
+                });
+                var statusColors = data.status_data.map(function(item) {
+                    var colorMap = {
+                        'pending': '#ffc107',
+                        'approved': '#28a745',
+                        'rejected': '#dc3545',
+                        'modification_requested': '#17a2b8'
+                    };
+                    return colorMap[item.status] || '#6c757d';
+                });
+                
+                new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusCounts,
+                            backgroundColor: statusColors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                });
+                
+                // Domain distribution chart
+                var domainCtx = document.getElementById('domainChart').getContext('2d');
+                var domainLabels = data.domain_data.map(function(item) {
+                    var domainMap = {
+                        'civil': 'Civil',
+                        'mechanical': 'Mechanical',
+                        'both': 'Both Civil & Mechanical'
+                    };
+                    return domainMap[item.domain] || item.domain;
+                });
+                var domainCounts = data.domain_data.map(function(item) {
+                    return item.count;
+                });
+                var domainColors = ['#4e73df', '#1cc88a', '#36b9cc'];
+                
+                new Chart(domainCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: domainLabels,
+                        datasets: [{
+                            data: domainCounts,
+                            backgroundColor: domainColors
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                });
+                
+                // Monthly cost trend chart
+                var trendCtx = document.getElementById('costTrendChart').getContext('2d');
+                var months = data.monthly_data.map(function(item) {
+                    return item.month;
+                });
+                var costs = data.monthly_data.map(function(item) {
+                    return item.total;
+                });
+                
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [{
+                            label: 'Total Approved Cost',
+                            data: costs,
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                gridLines: {
+                                    display: false
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    callback: function(value) {
+                                        return '₹' + value;
+                                    }
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    return 'Total Cost: ₹' + tooltipItem.yLabel.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error fetching dashboard data:', error);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Detail - {{ budget.name }}</title>
+</head>
+<body>
+    <h1>Budget: {{ budget.name }}</h1>
+    <p>Amount: {{ budget.amount }}</p>
+    <p>Start Date: {{ budget.start_date }}</p>
+    <p>End Date: {{ budget.end_date }}</p>
+
+    <h2>Expenses</h2>
+    <ul>
+        {% for expense in expenses %}
+            <li>{{ expense.category }}: {{ expense.amount }} on {{ expense.date }}</li>
+        {% empty %}
+            <li>No expenses recorded for this budget.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Income</h2>
+    <ul>
+        {% for income in incomes %}
+            <li>{{ income.source }}: {{ income.amount }} on {{ income.date }}</li>
+        {% empty %}
+            <li>No income recorded for this budget.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'home' %}">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: bhel
+      POSTGRES_PASSWORD: bhelpass
+      POSTGRES_DB: bhel_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://bhel:bhelpass@db:5432/bhel_db
+    ports:
+      - "8501:8501"
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
+
+volumes:
+  db_data:

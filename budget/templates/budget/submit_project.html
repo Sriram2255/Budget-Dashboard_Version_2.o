@@ -1,0 +1,279 @@
+{% extends 'budget/base.html' %}
+
+{% block title %}Submit Project - Project Management System{% endblock %}
+{% block page_title %}Submit New Project{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Project Submission Form
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Project Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Project Information
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.project_name.id_for_label }}" class="form-label">Project Name *</label>
+                            {{ form.project_name }}
+                            {% if form.project_name.errors %}
+                                <div class="text-danger">{{ form.project_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.domain.id_for_label }}" class="form-label">Domain *</label>
+                            {{ form.domain }}
+                            {% if form.domain.errors %}
+                                <div class="text-danger">{{ form.domain.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.priority.id_for_label }}" class="form-label">Priority *</label>
+                            {{ form.priority }}
+                            {% if form.priority.errors %}
+                                <div class="text-danger">{{ form.priority.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.estimated_budget.id_for_label }}" class="form-label">Estimated Budget (₹) *</label>
+                            {{ form.estimated_budget }}
+                            {% if form.estimated_budget.errors %}
+                                <div class="text-danger">{{ form.estimated_budget.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.project_description.id_for_label }}" class="form-label">Project Description *</label>
+                            {{ form.project_description }}
+                            {% if form.project_description.errors %}
+                                <div class="text-danger">{{ form.project_description.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Financial Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-rupee-sign me-2"></i>Financial Breakdown
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.manpower_count.id_for_label }}" class="form-label">Manpower Count</label>
+                            {{ form.manpower_count }}
+                            {% if form.manpower_count.errors %}
+                                <div class="text-danger">{{ form.manpower_count.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.manpower_cost.id_for_label }}" class="form-label">Manpower Cost (₹)</label>
+                            {{ form.manpower_cost }}
+                            {% if form.manpower_cost.errors %}
+                                <div class="text-danger">{{ form.manpower_cost.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.material_cost.id_for_label }}" class="form-label">Material Cost (₹)</label>
+                            {{ form.material_cost }}
+                            {% if form.material_cost.errors %}
+                                <div class="text-danger">{{ form.material_cost.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.equipment_cost.id_for_label }}" class="form-label">Equipment Cost (₹)</label>
+                            {{ form.equipment_cost }}
+                            {% if form.equipment_cost.errors %}
+                                <div class="text-danger">{{ form.equipment_cost.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.other_costs.id_for_label }}" class="form-label">Other Costs (₹)</label>
+                            {{ form.other_costs }}
+                            {% if form.other_costs.errors %}
+                                <div class="text-danger">{{ form.other_costs.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Total Cost (Auto-calculated)</label>
+                            <input type="text" class="form-control" id="total-cost" readonly placeholder="Will be calculated automatically">
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-calendar-alt me-2"></i>Project Timeline
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date *</label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                                <div class="text-danger">{{ form.start_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date *</label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                                <div class="text-danger">{{ form.end_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-user me-2"></i>Contact Information
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}
+                                <div class="text-danger">{{ form.department.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.contact_email.id_for_label }}" class="form-label">Contact Email</label>
+                            {{ form.contact_email }}
+                            {% if form.contact_email.errors %}
+                                <div class="text-danger">{{ form.contact_email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.contact_phone.id_for_label }}" class="form-label">Contact Phone</label>
+                            {{ form.contact_phone }}
+                            {% if form.contact_phone.errors %}
+                                <div class="text-danger">{{ form.contact_phone.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-file-alt me-2"></i>Additional Information
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="{{ form.justification.id_for_label }}" class="form-label">Justification *</label>
+                            {{ form.justification }}
+                            {% if form.justification.errors %}
+                                <div class="text-danger">{{ form.justification.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.risk_assessment.id_for_label }}" class="form-label">Risk Assessment</label>
+                            {{ form.risk_assessment }}
+                            {% if form.risk_assessment.errors %}
+                                <div class="text-danger">{{ form.risk_assessment.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.expected_outcome.id_for_label }}" class="form-label">Expected Outcome</label>
+                            {{ form.expected_outcome }}
+                            {% if form.expected_outcome.errors %}
+                                <div class="text-danger">{{ form.expected_outcome.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- File Upload -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-paperclip me-2"></i>Supporting Documents
+                            </h6>
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="{{ file_form.file.id_for_label }}" class="form-label">Upload Files</label>
+                            {{ file_form.file }}
+                            <div class="form-text">You can upload multiple files (PDF, DOC, XLS, etc.)</div>
+                            {% if file_form.file.errors %}
+                                <div class="text-danger">{{ file_form.file.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-12 mb-3">
+                            <label for="{{ file_form.description.id_for_label }}" class="form-label">File Description</label>
+                            {{ file_form.description }}
+                            {% if file_form.description.errors %}
+                                <div class="text-danger">{{ file_form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Project
+                            </button>
+                            <a href="{% url 'user_dashboard' %}" class="btn btn-secondary btn-lg ms-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-calculate total cost
+    function calculateTotal() {
+        const manpower = parseFloat(document.getElementById('{{ form.manpower_cost.id_for_label }}').value) || 0;
+        const material = parseFloat(document.getElementById('{{ form.material_cost.id_for_label }}').value) || 0;
+        const equipment = parseFloat(document.getElementById('{{ form.equipment_cost.id_for_label }}').value) || 0;
+        const other = parseFloat(document.getElementById('{{ form.other_costs.id_for_label }}').value) || 0;
+        
+        const total = manpower + material + equipment + other;
+        document.getElementById('total-cost').value = '₹' + total.toFixed(2);
+    }
+    
+    // Add event listeners
+    document.getElementById('{{ form.manpower_cost.id_for_label }}').addEventListener('input', calculateTotal);
+    document.getElementById('{{ form.material_cost.id_for_label }}').addEventListener('input', calculateTotal);
+    document.getElementById('{{ form.equipment_cost.id_for_label }}').addEventListener('input', calculateTotal);
+    document.getElementById('{{ form.other_costs.id_for_label }}').addEventListener('input', calculateTotal);
+    
+    // Calculate on page load
+    calculateTotal();
+</script>
+{% endblock %}

@@ -1,0 +1,333 @@
+{% extends 'budget/base.html' %}
+
+{% block title %}Admin Dashboard - Project Management System{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-2 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ total_projects }}</h4>
+                <p class="mb-0">Total Projects</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ pending_projects }}</h4>
+                <p class="mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ under_review }}</h4>
+                <p class="mb-0">Under Review</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ approved_projects }}</h4>
+                <p class="mb-0">Approved</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 mb-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h4>{{ rejected_projects }}</h4>
+                <p class="mb-0">Rejected</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-2 mb-3">
+        <div class="card bg-dark text-white">
+            <div class="card-body text-center">
+                <h4>₹{{ total_approved_cost|floatformat:0 }}</h4>
+                <p class="mb-0">Total Approved Cost</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Filter Projects</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+                            <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                            <option value="modification_requested" {% if status_filter == 'modification_requested' %}selected{% endif %}>Modification Requested</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Domain</label>
+                        <select name="domain" class="form-select">
+                            <option value="">All Domains</option>
+                            <option value="civil" {% if domain_filter == 'civil' %}selected{% endif %}>Civil Engineering</option>
+                            <option value="mechanical" {% if domain_filter == 'mechanical' %}selected{% endif %}>Mechanical Engineering</option>
+                            <option value="electrical" {% if domain_filter == 'electrical' %}selected{% endif %}>Electrical Engineering</option>
+                            <option value="both" {% if domain_filter == 'both' %}selected{% endif %}>Multi-Domain</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">Priority</label>
+                        <select name="priority" class="form-select">
+                            <option value="">All Priorities</option>
+                            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                            <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Projects Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Project Submissions</h5>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportToCSV()">
+                        <i class="fas fa-download me-1"></i>Export CSV
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="projectsTable">
+                            <thead>
+                                <tr>
+                                    <th>Tracking ID</th>
+                                    <th>Project Name</th>
+                                    <th>Submitted By</th>
+                                    <th>Domain</th>
+                                    <th>Priority</th>
+                                    <th>Total Cost</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                    <tr>
+                                        <td>
+                                            <code>{{ project.tracking_id }}</code>
+                                        </td>
+                                        <td>
+                                            <strong>{{ project.project_name }}</strong>
+                                            {% if project.project_description %}
+                                                <br><small class="text-muted">{{ project.project_description|truncatechars:50 }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ project.submitted_by.username }}
+                                            {% if project.department %}
+                                                <br><small class="text-muted">{{ project.department }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ project.get_domain_display }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if project.priority == 'urgent' %}danger{% elif project.priority == 'high' %}warning{% elif project.priority == 'medium' %}primary{% else %}secondary{% endif %}">
+                                                {{ project.get_priority_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>₹{{ project.total_cost|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ project.get_status_color }} status-badge">
+                                                {{ project.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ project.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'project_detail' project.tracking_id %}" class="btn btn-outline-primary" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'review_project' project.tracking_id %}" class="btn btn-outline-success" title="Review">
+                                                    <i class="fas fa-gavel"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No projects found</h5>
+                        <p class="text-muted">No projects match the current filters.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Projects by Domain</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="domainChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Projects by Priority</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="priorityChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Domain Chart
+    const domainCtx = document.getElementById('domainChart').getContext('2d');
+    const domainChart = new Chart(domainCtx, {
+        type: 'pie',
+        data: {
+            labels: [
+                {% for stat in domain_stats %}
+                    '{{ stat.domain|title }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for stat in domain_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Priority Chart
+    const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+    const priorityChart = new Chart(priorityCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for stat in priority_stats %}
+                    '{{ stat.priority|title }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Number of Projects',
+                data: [
+                    {% for stat in priority_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                backgroundColor: ['#6c757d', '#007bff', '#ffc107', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Export to CSV function
+    function exportToCSV() {
+        const table = document.getElementById('projectsTable');
+        const rows = table.querySelectorAll('tr');
+        let csv = [];
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = [];
+            const cols = rows[i].querySelectorAll('td, th');
+            
+            for (let j = 0; j < cols.length - 1; j++) { // Exclude actions column
+                row.push(cols[j].innerText.replace(/,/g, ';'));
+            }
+            csv.push(row.join(','));
+        }
+        
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'projects_export.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

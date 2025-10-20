@@ -1,0 +1,334 @@
+{% extends 'budget/base.html' %}
+
+{% block title %}Review Project - {{ project.tracking_id }}{% endblock %}
+{% block page_title %}Review Project: {{ project.tracking_id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Project Details -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Project Details</h5>
+                <span class="badge bg-{{ project.get_status_color }} fs-6">{{ project.get_status_display }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Tracking ID:</strong></td>
+                                <td><code>{{ project.tracking_id }}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Project Name:</strong></td>
+                                <td>{{ project.project_name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Domain:</strong></td>
+                                <td><span class="badge bg-info">{{ project.get_domain_display }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Priority:</strong></td>
+                                <td>
+                                    <span class="badge bg-{% if project.priority == 'urgent' %}danger{% elif project.priority == 'high' %}warning{% elif project.priority == 'medium' %}primary{% else %}secondary{% endif %}">
+                                        {{ project.get_priority_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Submitted By:</strong></td>
+                                <td>{{ project.submitted_by.username }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Department:</strong></td>
+                                <td>{{ project.department|default:"Not specified" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Financial Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Estimated Budget:</strong></td>
+                                <td>₹{{ project.estimated_budget|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Manpower Count:</strong></td>
+                                <td>{{ project.manpower_count }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Manpower Cost:</strong></td>
+                                <td>₹{{ project.manpower_cost|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Material Cost:</strong></td>
+                                <td>₹{{ project.material_cost|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Equipment Cost:</strong></td>
+                                <td>₹{{ project.equipment_cost|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Other Costs:</strong></td>
+                                <td>₹{{ project.other_costs|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="table-primary">
+                                <td><strong>Total Cost:</strong></td>
+                                <td><strong>₹{{ project.total_cost|floatformat:2 }}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>Timeline</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Start Date:</strong></td>
+                                <td>{{ project.start_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>End Date:</strong></td>
+                                <td>{{ project.end_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Duration:</strong></td>
+                                <td>{{ project.estimated_duration_days }} days</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Contact Information</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>{{ project.contact_email|default:"Not provided" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Phone:</strong></td>
+                                <td>{{ project.contact_phone|default:"Not provided" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Project Description</h6>
+                        <div class="border p-3 bg-light">
+                            {{ project.project_description|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Justification</h6>
+                        <div class="border p-3 bg-light">
+                            {{ project.justification|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if project.risk_assessment %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Risk Assessment</h6>
+                        <div class="border p-3 bg-light">
+                            {{ project.risk_assessment|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if project.expected_outcome %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Expected Outcome</h6>
+                        <div class="border p-3 bg-light">
+                            {{ project.expected_outcome|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Files -->
+        {% if files %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Supporting Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for file in files %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-file me-2"></i>{{ file.file_name }}
+                                </h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        {{ file.file_type }} • {{ file.file_size|filesizeformat }}<br>
+                                        Uploaded by {{ file.uploaded_by.username }} on {{ file.uploaded_at|date:"M d, Y" }}
+                                    </small>
+                                </p>
+                                {% if file.description %}
+                                    <p class="card-text">{{ file.description }}</p>
+                                {% endif %}
+                                <a href="{{ file.file.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fas fa-download me-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Comments -->
+        {% if comments %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Review Comments</h5>
+            </div>
+            <div class="card-body">
+                {% for comment in comments %}
+                <div class="border-start border-4 border-primary ps-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="mb-1">{{ comment.reviewer.username }}</h6>
+                        <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                    </div>
+                    <p class="mb-1">{{ comment.comment|linebreaks }}</p>
+                    <span class="badge bg-secondary">{{ comment.get_comment_type_display }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Review Panel -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Review Actions</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">Status Decision *</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-danger">{{ form.status.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.review_comments.id_for_label }}" class="form-label">Review Comments</label>
+                        {{ form.review_comments }}
+                        {% if form.review_comments.errors %}
+                            <div class="text-danger">{{ form.review_comments.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ comment_form.comment.id_for_label }}" class="form-label">Additional Comment</label>
+                        {{ comment_form.comment }}
+                        {% if comment_form.comment.errors %}
+                            <div class="text-danger">{{ comment_form.comment.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ comment_form.comment_type.id_for_label }}" class="form-label">Comment Type</label>
+                        {{ comment_form.comment_type }}
+                        {% if comment_form.comment_type.errors %}
+                            <div class="text-danger">{{ comment_form.comment_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Submit Review
+                        </button>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success" onclick="setStatus('approved')">
+                        <i class="fas fa-check me-2"></i>Approve
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="setStatus('rejected')">
+                        <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="setStatus('modification_requested')">
+                        <i class="fas fa-edit me-2"></i>Request Modification
+                    </button>
+                    <button class="btn btn-outline-info" onclick="setStatus('under_review')">
+                        <i class="fas fa-eye me-2"></i>Mark Under Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setStatus(status) {
+        document.getElementById('{{ form.status.id_for_label }}').value = status;
+        
+        // Auto-fill comments based on status
+        const commentField = document.getElementById('{{ form.review_comments.id_for_label }}');
+        const additionalCommentField = document.getElementById('{{ comment_form.comment.id_for_label }}');
+        
+        switch(status) {
+            case 'approved':
+                commentField.value = 'Project approved for implementation.';
+                additionalCommentField.value = 'Congratulations! Your project has been approved.';
+                break;
+            case 'rejected':
+                commentField.value = 'Project rejected due to insufficient justification or budget constraints.';
+                additionalCommentField.value = 'Please review the feedback and consider resubmitting with additional information.';
+                break;
+            case 'modification_requested':
+                commentField.value = 'Project requires modifications before approval.';
+                additionalCommentField.value = 'Please address the concerns mentioned in the review comments.';
+                break;
+            case 'under_review':
+                commentField.value = 'Project is currently under detailed review.';
+                additionalCommentField.value = 'Your project is being reviewed by the team.';
+                break;
+        }
+        
+        // Set comment type
+        document.getElementById('{{ comment_form.comment_type.id_for_label }}').value = status === 'approved' ? 'approval' : 
+                                                                                        status === 'rejected' ? 'rejection' : 
+                                                                                        status === 'modification_requested' ? 'modification' : 'general';
+    }
+</script>
+{% endblock %}
