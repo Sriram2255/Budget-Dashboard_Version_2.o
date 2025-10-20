@@ -1,4 +1,4 @@
-# BHEL Budget Automation - Full Project
+# Budget Automation - Full Project
 
 This project automates ingestion of budget Excel/CSV files, cleans and persists the records,
 and provides an interactive Streamlit + Plotly dashboard. It supports recurrent automatic updates.
